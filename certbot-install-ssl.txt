@@ -1,0 +1,28 @@
+通过部署SSL证书实现HTTPS （本次连带使用的是阿里云的DNS）（部署泛域名SSL–https /例如：*.abc.com） 使用pip安装Certbot
+
+最好先创建一个Python虚拟环境，然后再安装Certbot
+安装虚拟环境软件包（针对于Python2.7）
+1.sudo yum install python-virtualenv
+创建虚拟环境
+2.sudo virtualenv /usr/local/python-certbot
+激活虚拟环境
+3.source /usr/local/python-certbot/bin/activate
+首先更新pip
+4.pip install –upgrade pip
+安装Certbot
+5.pip install certbot
+前5步安装完成后执行命令
+source /usr/local/python-certbot/bin/activate
+certbot –manual –preferred-challenges dns certonly -d *.xxx.com （末尾的*.XXX.COM 写成自己的网站）
+执行完之后会提示：按回车 （提示！先不要按回车）
+登录阿里云，域名控制台，找到此域名添加一条TXT记录，此记录会在你执行完上面命令后会自动生成 【主机记录+记录值】
+确认添加TXT无误，然后再按回车
+SSL秘钥生成完成，会保存在/etc/letsencrypt/live…目录下
+在该目录下有俩个【cert.pem | privkey.pem】 将俩个pem放到nginx的conf，对应的网站conf中
+修改配置文件的端口443 （如果有需要可以做80自动跳转443）并且重启nginx~【重启之前 nginx -t 检查配置】
+【提示！】：Cerbot证书的有效期为三个月，所以证书到期时，要使用Certbot更新证书，到安装Certbot的目中路bin下找到certbot
+
+执行命令 ： ./certbot renew 执行完会有提示
+如果嫌麻烦，可以写到定时任务里,每天执行一次
+编辑 crontab -e
+0 0 1 * * /usr/local/certbot.sh ? /tmp/certbot.log
